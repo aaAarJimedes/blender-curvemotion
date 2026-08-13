@@ -798,7 +798,6 @@ class CURVEMOTION_OT_shear_right(Operator, CURVEMOTION_OT):
     """Shift the value in time of selected or current keys """
 
     bl_idname = "anim.aide_shear_right"
-
     bl_label = "Shear Right"
 
     tool_type = 'SHEAR_RIGHT'
