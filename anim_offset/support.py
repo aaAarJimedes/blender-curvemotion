@@ -64,8 +64,7 @@ def magnet_handlers(scene):
 
         anim_offset = scene.curvemotion.anim_offset
         if anim_offset.mask_in_use:
-            remove_mask(context)
-            reset_timeline_mask(context)
+            close_mask(context)
 
         bpy.app.handlers.depsgraph_update_post.remove(magnet_handlers)
         utils.remove_message()
@@ -345,6 +344,57 @@ def store_user_timeline_ranges(context):
     anim_offset.user_scene_start = scene.frame_start
     anim_offset.user_scene_end = scene.frame_end
     # anim_offset.user_scene_auto = scene.tool_settings.use_keyframe_insert_auto
+
+
+def get_full_animation_range(context):
+    """Return the start/end frames covering the selected objects' actions."""
+
+    objects = context.selected_objects
+    if not objects:
+        objects = bpy.data.objects
+
+    ranges = []
+    for obj in objects:
+        anim_data = getattr(obj, 'animation_data', None)
+        if anim_data is None:
+            continue
+        action = getattr(anim_data, 'action', None)
+        if action is None:
+            continue
+
+        frame_range = getattr(action, 'frame_range', None)
+        if frame_range is not None:
+            try:
+                ranges.append((int(frame_range[0]), int(frame_range[1])))
+                continue
+            except Exception:
+                pass
+
+        fcurves = utils.action_fcurves(action)
+        if fcurves is None:
+            continue
+        for fcurve in fcurves:
+            points = fcurve.keyframe_points
+            if points:
+                ranges.append((int(points[0].co.x), int(points[-1].co.x)))
+
+    if not ranges:
+        return None, None
+    return min(start for start, end in ranges), max(end for start, end in ranges)
+
+
+def close_mask(context):
+    """Remove the mask curve, disable the preview range, and restore the full animation range."""
+
+    remove_mask(context)
+    reset_timeline_mask(context)
+
+    scene = context.scene
+    scene.use_preview_range = False
+    start, end = get_full_animation_range(context)
+    if start is not None and end is not None:
+        scene.frame_start = start
+        scene.frame_end = end
 
 
 # ---------- Functions for Operators ------------

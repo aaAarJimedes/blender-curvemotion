@@ -141,8 +141,7 @@ class CURVEMOTION_OT_deactivate_anim_offset(Operator):
         anim_offset = scene.curvemotion.anim_offset
 
         if anim_offset.mask_in_use:
-            support.remove_mask(context)
-            support.reset_timeline_mask(context)
+            support.close_mask(context)
 
         scene.tool_settings.use_keyframe_insert_auto = anim_offset.user_scene_auto
 
@@ -450,8 +449,7 @@ class CURVEMOTION_OT_delete_anim_offset_mask(Operator):
         # if support.magnet_handlers in bpy.app.handlers.depsgraph_update_post:
         #     bpy.app.handlers.depsgraph_update_post.remove(support.magnet_handlers)
 
-        support.remove_mask(context)
-        support.reset_timeline_mask(context)
+        support.close_mask(context)
 
         context.area.tag_redraw()
         # bpy.ops.wm.redraw_timer()

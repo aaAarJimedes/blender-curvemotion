@@ -10,6 +10,8 @@
 - Replaced the per-frame 3D viewport text overlay and temporary theme color
   changes with the workspace status bar, so enabling the addon no longer
   changes user preferences or adds a permanent draw handler.
+- Leaving an Anim Offset mask now clears the mask, disables the preview range,
+  and restores the full animation range.
 
 ## 1.0.39 - CurveMotion (Blender 5.1 rebuild)
 
