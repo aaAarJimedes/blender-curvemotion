@@ -1,5 +1,16 @@
 # Changelog
 
+## Unreleased - Performance fixes
+
+- Anim Offset now runs only while a transform operator is active, instead of
+  scanning every selected object and FCurve on every depsgraph update.
+- Fast Offset skips repeated updates from the same transform operator.
+- Mask blend curves are resolved once per FCurve, zero deltas skip work, and
+  sort/handle recalculation only happens when keys actually changed.
+- Replaced the per-frame 3D viewport text overlay and temporary theme color
+  changes with the workspace status bar, so enabling the addon no longer
+  changes user preferences or adds a permanent draw handler.
+
 ## 1.0.39 - CurveMotion (Blender 5.1 rebuild)
 
 CurveMotion is a renamed, Blender 5.1 rebuild of AnimAide `v1_0_39` from
