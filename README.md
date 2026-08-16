@@ -39,6 +39,8 @@ Main changes:
 - Removed the old `TIME_MT_editor_menus` registration.
 - Bone curve tools respect the selected pose bone again on Blender 5.1, fixing
   the `'Bone' object has no attribute 'select'` error when smoothing curves.
+- Anim Offset only scans curves during real transform operations, uses the
+  workspace status bar for messages, and no longer changes user themes.
 
 ### Install
 
