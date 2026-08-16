@@ -20,7 +20,6 @@ Created by Ares Deveaux
 '''
 
 import bpy
-import blf
 
 # from curve_tools.support import get_items
 
@@ -143,7 +142,7 @@ def modify_marker(marker, name='SAME', frame='SAME'):
 
 
 def remove_marker(side):
-    """Removes reference frame markers"""
+    """Removes reference frames markers"""
 
     markers = bpy.context.scene.timeline_markers
 
@@ -191,65 +190,23 @@ def get_items(context, any_mode=False):
         return bpy.data.objects
 
 
-text_handle = None
-bar_color = None
-pref_autosave = None
-dopesheet_color = None
-graph_color = None
-nla_color = None
-
-
 def set_bar_color():
-    global bar_color, dopesheet_color, graph_color, nla_color, pref_autosave
-    if bar_color is None:
-        bar_color = True
-        pref_autosave = bpy.context.preferences.use_preferences_save
-        dopesheet_color = bpy.context.preferences.themes[0].dopesheet_editor.space.header[:]
-        graph_color = bpy.context.preferences.themes[0].graph_editor.space.header[:]
-        nla_color = bpy.context.preferences.themes[0].nla_editor.space.header[:]
-
-    # preview_range was removed from the graph editor theme in newer
-    # Blender versions; use a stable warm highlight for the active state.
-    highlight = (1.0, 0.55, 0.25, 1.0)
-    bpy.context.preferences.use_preferences_save = False
-    bpy.context.preferences.themes[0].dopesheet_editor.space.header = highlight
-    bpy.context.preferences.themes[0].nla_editor.space.header = highlight
-    bpy.context.preferences.themes[0].graph_editor.space.header = highlight
+    """Kept for API compatibility; messages now use the workspace status bar."""
 
 
 def reset_bar_color():
-    if pref_autosave is not None:
-        bpy.context.preferences.use_preferences_save = pref_autosave
-    if dopesheet_color is not None:
-        bpy.context.preferences.themes[0].dopesheet_editor.space.header = dopesheet_color
-    if graph_color is not None:
-        bpy.context.preferences.themes[0].graph_editor.space.header = graph_color
-    if nla_color is not None:
-        bpy.context.preferences.themes[0].nla_editor.space.header = nla_color
+    """Kept for API compatibility; theme is no longer modified."""
 
 
 def add_message(message):
-
-    global text_handle
-
-    def draw_text_callback(info):
-        font_id = 0
-        blf.position(font_id, 5, 80, 0)
-        blf.size(font_id, 30)
-        blf.color(font_id, 1, 1, 1, .5)
-        blf.draw(font_id, info)
-
-    if text_handle is None:
-        # set_bar_color(0.5, 0.3, 0.2, 1)
-        text_handle = bpy.types.SpaceView3D.draw_handler_add(
-            draw_text_callback, (message,),
-            'WINDOW', 'POST_PIXEL')
+    try:
+        bpy.context.window.workspace.status_text_set(message)
+    except Exception:
+        pass
 
 
 def remove_message():
-    global text_handle
-
-    reset_bar_color()
-    if text_handle:
-        bpy.types.SpaceView3D.draw_handler_remove(text_handle, 'WINDOW')
-    text_handle = None
+    try:
+        bpy.context.window.workspace.status_text_set(None)
+    except Exception:
+        pass
