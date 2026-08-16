@@ -32,6 +32,20 @@ user_scene_range = {}
 global_values = {}
 last_op = None
 
+TRANSFORM_OPERATOR_IDS = {
+    'TRANSFORM_OT_translate',
+    'TRANSFORM_OT_rotate',
+    'TRANSFORM_OT_resize',
+    'TRANSFORM_OT_skin_resize',
+    'TRANSFORM_OT_transform',
+    'TRANSFORM_OT_shear',
+    'TRANSFORM_OT_bend',
+    'TRANSFORM_OT_tosphere',
+    'TRANSFORM_OT_mirror',
+    'TRANSFORM_OT_edge_slide',
+    'TRANSFORM_OT_vertex_slide',
+}
+
 # ---------- Main Tool ------------
 
 
@@ -43,6 +57,7 @@ def magnet_handlers(scene):
     context = bpy.context
 
     external_op = context.active_operator
+    external_op_name = getattr(external_op, 'bl_idname', None)
 
     if context.scene.tool_settings.use_keyframe_insert_auto or \
             (context.mode != "OBJECT" and context.mode != "POSE"):
@@ -54,6 +69,10 @@ def magnet_handlers(scene):
 
         bpy.app.handlers.depsgraph_update_post.remove(magnet_handlers)
         utils.remove_message()
+        return
+
+    if external_op_name is None or external_op_name not in TRANSFORM_OPERATOR_IDS:
+        last_op = None
         return
 
     curvemotion = context.scene.curvemotion
@@ -69,14 +88,10 @@ def magnet_handlers(scene):
                 add_keys(context)
             return
 
-    # Doesn't refresh if fast mask is selected:
-    # Each time an operator is used is a different one, so this tests
-    # if any transform on an object is steel been applied
-
-    # if external_op is last_op and anim_offset.fast_mask:
-    if external_op is last_op and pref.ao_fast_offset:
+    # Doesn't refresh repeatedly while the same transform operator is active.
+    if pref.ao_fast_offset and external_op_name == last_op:
         return
-    last_op = context.active_operator
+    last_op = external_op_name
 
     # context.scene.tool_settings.use_keyframe_insert_auto = False
 
@@ -105,27 +120,38 @@ def magnet(context, obj, fcurve):
     if getattr(fcurve.group, 'name', None) == 'curvemotion':
         return  # we don't want to select keys on reference fcurves
 
-    blends_action = bpy.data.actions.get('curvemotion')
-    blends_curves = utils.action_fcurves(blends_action)
+    mask_in_use = scene.curvemotion.anim_offset.mask_in_use
+    blend_curve = None
+    if mask_in_use:
+        blends_action = bpy.data.actions.get('curvemotion')
+        blends_curves = utils.action_fcurves(blends_action)
+        if blends_curves is not None and len(blends_curves) > 0:
+            blend_curve = blends_curves[0]
 
     delta_y = get_delta(context, obj, fcurve)
+    if delta_y == 0:
+        return
 
+    changed = False
     for k in fcurve.keyframe_points:
 
-        if not context.scene.curvemotion.anim_offset.mask_in_use:
+        if not mask_in_use:
             factor = 1
         elif scene.frame_start <= k.co.x <= scene.frame_end:
             factor = 1
-        elif blends_curves is not None and len(blends_curves) > 0:
-            blends_curve = blends_curves[0]
-            factor = blends_curve.evaluate(k.co.x)
+        elif blend_curve is not None:
+            factor = blend_curve.evaluate(k.co.x)
         else:
             factor = 0
 
-        k.co_ui.y = k.co_ui.y + (delta_y * factor)
+        offset = delta_y * factor
+        if offset:
+            k.co_ui.y += offset
+            changed = True
 
-    fcurve.keyframe_points.sort()
-    fcurve.keyframe_points.handles_recalc()
+    if changed:
+        fcurve.keyframe_points.sort()
+        fcurve.keyframe_points.handles_recalc()
 
     return
 
