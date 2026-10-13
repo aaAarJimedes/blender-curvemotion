@@ -390,13 +390,22 @@ def set_ref_marker(context):
     # if tool.use_markers:
     if pref.ct_use_markers:
         markers = context.scene.timeline_markers
-        left = 0
-        right = 0
+        left = None
+        right = None
         for marker in markers:
-            if marker.get('side') == 'L':
+            # Blender >= 5.0: timeline markers ('TimelineMarker') no longer
+            # support ID properties, so marker.get('side') raises a TypeError.
+            # The side is encoded in the marker name instead ('L' / 'R').
+            if marker.name == 'L':
                 left = marker.frame
-            elif marker.get('side') == 'R':
+            elif marker.name == 'R':
                 right = marker.frame
+        # If a reference marker is missing, fall back to the reference
+        # frames stored on the tool.
+        if left is None:
+            left = tool.left_ref_frame
+        if right is None:
+            right = tool.right_ref_frame
     else:
         left = tool.left_ref_frame
         right = tool.right_ref_frame

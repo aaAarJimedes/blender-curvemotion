@@ -1,24 +1,3 @@
------ I'm in touch with Blender developers to bring this tools to core Blender ------
-
->## Development no longer active
->
-> I started this project as a learning experience. I'm an animator wanting to learn how to code, 
-> and while fun it takes a lot of time.
->
-> Blender is transitioning to a more robust animation module, which is great but most likely will 
-> break AnimAide. Life is getting in the way of me continuing to develop the addon at this time,
-> so I ask if anybody would be willing to fork it and continue the journey for the Blender
-> community. I'm sure a real coder would make AnimAide even better.
->
-> There is a list of forks but most of them are of old code and don't know if they are maintained.
->
-> If anybody wants to do it (and gives me the info) I will link it here so people know
-> where to go.
->
-> Thanks.
->
-> Ares
-
 # CurveMotion
 
 ## Blender 5.1 compatibility rebuild of AnimAide
@@ -27,6 +6,11 @@ CurveMotion is a community rebuild of AnimAide `v1_0_39`, renamed as a new
 project and adapted for Blender 5.1. The original project is no longer
 maintained by the author, so this fork adds the API changes required by
 current Blender versions.
+
+Original author: **Ares Deveaux**. Upstream:
+[aresdevo/animaide](https://github.com/aresdevo/animaide), licensed under
+[GPL-3.0-or-later](LICENSE). This community rebuild retains the original
+copyright notices and license.
 
 Main changes:
 
@@ -41,14 +25,24 @@ Main changes:
   the `'Bone' object has no attribute 'select'` error when smoothing curves.
 - Anim Offset only scans curves during real transform operations, uses the
   workspace status bar for messages, and no longer changes user themes.
+- Reference markers work without TimelineMarker custom properties; unrelated
+  markers are preserved and missing reference markers use the stored frames.
 
 ### Install
 
-1. Download or build `curvemotion-5.1.zip` from this repository.
+1. Download `curvemotion-1.0.39-blender-5.1.zip` from the
+   [release page](https://github.com/aaAarJimedes/blender-curvemotion/releases/latest).
 2. In Blender 5.1 open `Preferences -> Add-ons`.
 3. Click `Install from Disk`, select the zip file, then enable `CurveMotion`.
 
 - *The original AnimAide manual is still a useful reference: [Manual](https://aresdevo.github.io/animaide/)*
+
+The release includes a build manifest and SHA-256 checksums. Build and test
+instructions are in [docs/GITHUB_DELIVERY.md](docs/GITHUB_DELIVERY.md).
+The automated Blender 5.1 check installs the ZIP into an isolated profile,
+exercises reference markers and the Graph Editor smoothing operator, checks
+Anim Offset key values, and verifies enable/disable registration. Interactive
+dragging and the complete tool set still require manual testing.
 
 In contrast to modeling, when animating there are not that many options to manipulate keys on an f-curve like you can
 with the vertices on a geometry. That is where **CurveMotion** comes in.

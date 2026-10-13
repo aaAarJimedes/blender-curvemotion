@@ -129,7 +129,14 @@ def add_marker(name, side, frame=0, overwrite=True):
     if overwrite:
         remove_marker(side)
     marker = markers.new(name=name, frame=frame)
-    marker['side'] = side
+    # Blender >= 5.0: timeline markers ('TimelineMarker') no longer support
+    # ID properties, so writing marker['side'] raises a TypeError. The side
+    # is carried by the marker name instead ('L' / 'R'). The custom property
+    # is still stored on older Blender versions that allow it.
+    try:
+        marker['side'] = side
+    except TypeError:
+        pass
     return marker
 
 
@@ -146,8 +153,10 @@ def remove_marker(side):
 
     markers = bpy.context.scene.timeline_markers
 
-    for marker in markers:
-        if marker.get('side') == side:
+    for marker in list(markers):
+        # Blender >= 5.0: markers have no ID properties, so the side is
+        # identified by the marker name ('L' / 'R').
+        if marker.name == side:
             markers.remove(marker)
     return
 
